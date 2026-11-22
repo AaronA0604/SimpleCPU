@@ -11,16 +11,13 @@ This clock is made of 3 not gates, which invert the value put into them. So, if 
 ## Program Counter (PC)
 The job of the PC is to track what step we are on. It moves to the next step or jumps (I'll explain this later) every clock tick.
 
-
 <img width="362" height="589" alt="Screenshot 2026-11-21 at 7 48 41 PM" src="https://github.com/user-attachments/assets/c5d19326-c650-4bbc-a9dd-ba8b2a29f4ba" />
 
 The first part of the PC is a multiplexer (mux) that first the number of step we were just on, and a number from the Read-Only Memory that is a step to jump to. It then decides whether it should increment the step we're on by 1 or jump based on an input from the branch logic part of the CPU.
 
-
 <img width="432" height="780" alt="Screenshot 2026-11-21 at 7 52 08 PM" src="https://github.com/user-attachments/assets/0056b132-4dd8-41ce-bc1b-15c9178e142b" />
 
 The second part of the PC is an adder. It takes the output from the mux (either 1 for "go to the next step" or another number for a jump) and adds that number to the number of the previous step. It works by using XOR gates, AND gates, and OR gates.
-
 
 <img width="238" height="787" alt="Screenshot 2026-11-21 at 7 53 31 PM" src="https://github.com/user-attachments/assets/dd4fe64d-af38-44bc-a26d-f01b7a066ed3" />
 
@@ -29,16 +26,13 @@ That last part is a register (flip flops that store the value). This keeps the n
 ## Read-Only Memory (ROM)
 The point of the ROM is the store the instructions to run, and then using the number step from the PC, access the number instruction and send it to the rest of the CPU to run.
 
-
 <img width="414" height="801" alt="Screenshot 2026-11-21 at 7 57 26 PM" src="https://github.com/user-attachments/assets/b0ba651a-699a-4ee0-b147-acbd49524567" />
 
 The first part of it is a decoder that gets the output from the PC. If that output is 0110 (6), for example then the decoder makes all of its outputs high except for the 6th output. This means that the CPU is going to run the 6th instruction stored in the ROM.
 
-
 <img width="709" height="792" alt="Screenshot 2026-11-21 at 8 00 42 PM" src="https://github.com/user-attachments/assets/ee12e358-516a-4cee-9231-5263894a260f" />
 
 The ROM stores all of its instructions in this 16x15 matrix. Every row is an instruction, and each column is a different part of that instruction needed to make a full instruction. The matrix is made up of latching switches. They have two coils so that you can turn them on and off electronically, and then they hold their value even while the CPU is off.
-
 
 <img width="479" height="639" alt="Screenshot 2026-11-21 at 8 02 28 PM" src="https://github.com/user-attachments/assets/016aef6e-9226-48dd-b512-942c98e83a1e" />
 
@@ -47,16 +41,13 @@ This is one latch in the matrix. It is the first one in it's row. The row is con
 ## Arithmetic Logic Unit (ALU)
 The ALU is the heart of the CPU. It does all the computations that are needed for the program. The values for the computation are stored in the ROM, as well as the operation to do to those values. It can only take in 2 value that are each 2 bits.
 
-
 <img width="789" height="798" alt="Screenshot 2026-11-21 at 8 13 28 PM" src="https://github.com/user-attachments/assets/a60ab219-baef-461e-91de-41a448aaec86" />
 
 This part of the ALU is the adder and subtracter. It takes in the 2 2 bitvalues, denoted a A0, A1, B0, and B1 in this image, and adds or subtracts them based on another input. It works by using XOR gates, AND gates, and OR gates. The AND gate are the top of the image decides whether this adder/subtracer should add or subtract. The AND gates takes two inputs, S0 and S1 (I'll explain where they come from later), and outputs a 1 or 0 to say add or subtract. This output is used as the input for some of the XOR gates. This section of the ALU can both add and subtract, since for subtracting, it inverts the second number, adds it to the first, and adds 1.
 
-
 <img width="133" height="800" alt="Screenshot 2026-11-21 at 8 19 56 PM" src="https://github.com/user-attachments/assets/b0fc567f-6582-4bfe-bc48-8bc8b720703d" />
 
 This part of the ALU does 4 operations: it can see if values are both 1, see if values are different, see if at least one of the values is 1, or see if none of the values are 1. It uses AND gates, XOR gates, OR gates, and NOT gates respectively to do these different operations.
-
 
 <img width="873" height="737" alt="Screenshot 2026-11-21 at 8 21 56 PM" src="https://github.com/user-attachments/assets/d3ef6476-8c43-44b9-ad52-12ef1b58816f" />
 
@@ -64,7 +55,6 @@ Since there are many operations that the ALU can do, these two muxs decide which
 
 ## Flags
 Often times the CPU doesn't care what the output number is; it only cares about its characteristics (negative, zero, etc.) These flags describe those characteristics. There are 3 flags: negative, zero, and overflow. Negative sees if the output is negative, zero sees if the output is zero, and overflow sees if the output was more than 2 bits (this could happen if 11 and 11 were added, for example, as that would result in 110).
-
 
 <img width="501" height="548" alt="Screenshot 2026-11-21 at 8 27 39 PM" src="https://github.com/user-attachments/assets/c2b5d2ef-ea08-41a0-b324-fb1a3ab69b7f" />
 
@@ -89,7 +79,6 @@ Because of this, we have a mux that decides if we want to use a new value for A0
 
 ## Branch Logic
 Sometimes, we want to skip to a different instruction based on the output of the last operation.
-
 
 <img width="749" height="716" alt="Screenshot 2026-11-21 at 8 44 52 PM" src="https://github.com/user-attachments/assets/33d0d499-1d8a-49a0-afb5-e0de1a358b80" />
 
