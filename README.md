@@ -32,7 +32,7 @@ The first part of it is a decoder that gets the output from the PC. If that outp
 
 <img width="709" height="792" alt="Screenshot 2026-11-21 at 8 00 42 PM" src="https://github.com/user-attachments/assets/ee12e358-516a-4cee-9231-5263894a260f" />
 
-The ROM stores all of its instructions in this 16x15 matrix. Every row is an instruction, and each column is a different part of that instruction needed to make a full instruction. The matrix is made up of latching switches. They have two coils so that you can turn them on and off electronically, and then they hold their value even while the CPU is off.
+The ROM stores all of its instructions in this 16x15 matrix. Every row is an instruction, and each column is a different part of that instruction needed to make a full instruction. The matrix is made up of latching switches. They have two coils so that you can turn them on and off electronically (this will make sense when I talk about the assembler), and then they hold their value even while the CPU is off.
 
 <img width="479" height="639" alt="Screenshot 2026-11-21 at 8 02 28 PM" src="https://github.com/user-attachments/assets/016aef6e-9226-48dd-b512-942c98e83a1e" />
 
@@ -101,8 +101,48 @@ Under that is a master-slave latch to store two values. It takes the input from 
 The last section is an AND gate that takes RUN_S_N and /RESET (which it gets from the image above) and outputs /RESET_CPU if both those values are on, meaning the set switch is on and the reset button is pressed (which is needed because otherwise the ROM will be messed up).
 
 ## Set Counter
+<img width="494" height="767" alt="Screenshot 2026-11-23 at 2 50 37 PM" src="https://github.com/user-attachments/assets/1a5241a9-79bc-4dba-b377-24af09236b85" />
 
+This is the counter for the set clock that keeps track of what step it is on. It increases by one every clock pulse. Bar MR is connected to RUN_S so that it only counts if that switch is on. CP is connected to SLOW_CLK_N so that it increases every clock pulse. TC is connected to CEP with an inverter so that it can't count past 16.
+
+<img width="432" height="809" alt="Screenshot 2026-11-23 at 2 53 27 PM" src="https://github.com/user-attachments/assets/600ca7ed-4355-441f-8c25-70e939b652a6" />
+
+This is a decoder, just like the one that connects to the ROM. It takes the value from the counter and makes that output low and every other output high, selecting that row.
 
 ## Assembler
+<img width="1046" height="530" alt="Screenshot 2026-11-23 at 2 54 40 PM" src="https://github.com/user-attachments/assets/4e8235d6-77cb-4a2b-8b01-07333930d25a" />
 
-## Reset Switch
+This is the final piece in this section, and once you understand it you will understand how this section works. Remember, the point of this section is the write instructions to the ROM. This piece is a matrix that mirrors the ROM, with the same number of rows and columns. It is a bunch of switches that you switch to manually write the instructions. For example if you want the value of A1 in the third step to be one, you go to the third row in the A1 column and flip the switch on, so it is a one. The idea of this matrix is that you manually set all the values, and then you flip the RUN_S switch from before, and it writes all these values to the ROM.
+
+<img width="739" height="525" alt="Screenshot 2026-11-23 at 2 59 41 PM" src="https://github.com/user-attachments/assets/c8362f45-19e4-476b-ac30-6322a8c53d50" />
+
+This is one switch in the matrix. It is very simple. It is just connected to a diode so the current doesn't leak, and all you need to do is flip the switch and the value changes.
+
+## Assembler connection to ROM
+This is the most complicated part of the CPU. The idea behind it is that the set counter turns on the rows in the assembler one at a time. There is only one row that has power at a time. Then, the values from each of the columns in the assembler pass through gates (I'll explain these later) and a driver to give it enough power to change the values in the ROM. The value from the columns runs down its corresponding column in the ROM, and only changes a latches value if its row is turned on. This way, by running through every row, every latch can be changed to match the assembler.
+
+<img width="983" height="498" alt="Screenshot 2026-11-23 at 3 08 03 PM" src="https://github.com/user-attachments/assets/f618a955-c98d-4287-bcf8-ec3fca5536c2" />
+
+These are all the gates for the 15 columns in the ROM.
+
+<img width="658" height="386" alt="Screenshot 2026-11-23 at 3 08 56 PM" src="https://github.com/user-attachments/assets/7508cf71-de5c-4194-ad81-f176671c36f4" />
+
+There are two for every column; one to make the latch value 0, and one to make it 1. The AND gate only lets a one through if the value inputted into it from the column in the assembler is a one, and the NOT gate only lets a one through the value inputted into it from the column in the assembler is a one. Only one of these gates will output a one.
+
+<img width="994" height="562" alt="Screenshot 2026-11-23 at 3 12 24 PM" src="https://github.com/user-attachments/assets/234abfad-4d42-4f8d-8831-0e1179a81d88" />
+
+These two outputs then go to the driver, which makes their voltage much higher. If it's input was a 1 and a 0, it would still output a 1 and a 0, only the 1 would be a higher voltage.
+
+<img width="523" height="778" alt="Screenshot 2026-11-23 at 3 14 20 PM" src="https://github.com/user-attachments/assets/86bb30c3-1f72-499a-bc49-db1abc0cf2b8" />
+
+It sends it's output to the two coils in the latch. The +S coil is to make the latch a 1, so that pin is only fed from the pin in the driver fed by the AND gate. The +R coil is to make the latch a 0, so that pin is only fed from the pni in the driver fed by the NOT gate.
+
+## PCB
+<img width="817" height="628" alt="Screenshot 2026-11-23 at 3 15 54 PM" src="https://github.com/user-attachments/assets/ddbb0748-0f68-4277-956c-87b4b3257385" />
+
+For the PCB, wire it however you'd like. This is a picture of how I wired mine, but you'll have to figure out what works for you.
+
+<img width="543" height="643" alt="Screenshot 2026-11-23 at 3 16 29 PM" src="https://github.com/user-attachments/assets/839222ff-accc-42cf-8c1c-9e4ca2847aeb" />
+I recommend adding this chart as the values that you need to set the S0, S1, and S2 columns to in the assembler to do these different operations.
+
+It is also helpful to label your LEDs so you know what they are telling you. Additionally, you can label the columns in the assembler so you know what value each column is. This the what each column is for, from left to right: A0, A1, B0, B1, S0, S1, S2, A_OPCODE, FLAG0, FLAG1, FLAG_VALUE, ADDRESS0, ADDRESS1, ADDRESS2, ADDRESS3.
