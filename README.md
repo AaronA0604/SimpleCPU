@@ -85,9 +85,23 @@ Sometimes, we want to skip to a different instruction based on the output of the
 To decide this, we use a mux and an XOR gate. The mux takes in the flag values and ties all the other unused inputs to GND. It also takes in two bits from the ROM called FLAG0 and FLAG1. These 2 values tell the mux what flag to look at. If those values make the number 01 (1), the mux looks at the first flag. It outputs the value of that flag to the XOR. The XOR then takes another input from the ROM called FLAG_VALUE. FLAG_VALUE says if the program should jump to a different step if the falg value is 0 or 1. Then it outputs JMP to the PC mux, which I mentioned before.
 
 ## Set Clock
+This is the first piece of the part of the CPU that changes the instructions in the ROM.
 
+<img width="398" height="812" alt="Screenshot 2026-11-23 at 1 01 50 PM" src="https://github.com/user-attachments/assets/be15eede-7434-431d-aa90-ba5510be452a" />
+The first part of this is the 5-5-5 timer at the top. It and everything attached to it are the actual clock. It's a more complicated version of the clock from before. It outputs SLOW_CLK and its opposite, SLOW_CLK_N.
+
+The AND gate under it takes output from that clock, SLOW_CLK, and also RUN_S, which I'll explain later. If both those values are true, meaning if the clock is pulsing and also RUN_S is on, then output pulse.
+
+The NOT gate under that inverts PULSE to PULSE_N.
+
+Under that is a master-slave latch to store two values. It takes the input from a switch, which when it is turned on it means that this reset circuit should run. It also takes SLOW_CLK_N as its second input, and then stores the value of RUN_S and its opposite, RUN_S_N.
+
+<img width="1036" height="652" alt="Screenshot 2026-11-23 at 1 13 27 PM" src="https://github.com/user-attachments/assets/a55e18a9-630d-4e7f-a8d2-3da7d4b1608e" />
+
+The last section is an AND gate that takes RUN_S_N and /RESET (which it gets from the image above) and outputs /RESET_CPU if both those values are on, meaning the set switch is on and the reset button is pressed (which is needed because otherwise the ROM will be messed up).
 
 ## Set Counter
+
 
 ## Assembler
 
