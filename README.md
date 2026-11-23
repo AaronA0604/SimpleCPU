@@ -88,6 +88,7 @@ To decide this, we use a mux and an XOR gate. The mux takes in the flag values a
 This is the first piece of the part of the CPU that changes the instructions in the ROM.
 
 <img width="398" height="812" alt="Screenshot 2026-11-23 at 1 01 50 PM" src="https://github.com/user-attachments/assets/be15eede-7434-431d-aa90-ba5510be452a" />
+
 The first part of this is the 5-5-5 timer at the top. It and everything attached to it are the actual clock. It's a more complicated version of the clock from before. It outputs SLOW_CLK and its opposite, SLOW_CLK_N.
 
 The AND gate under it takes output from that clock, SLOW_CLK, and also RUN_S, which I'll explain later. If both those values are true, meaning if the clock is pulsing and also RUN_S is on, then output pulse.
@@ -143,6 +144,7 @@ It sends it's output to the two coils in the latch. The +S coil is to make the l
 For the PCB, wire it however you'd like. This is a picture of how I wired mine, but you'll have to figure out what works for you.
 
 <img width="543" height="643" alt="Screenshot 2026-11-23 at 3 16 29 PM" src="https://github.com/user-attachments/assets/839222ff-accc-42cf-8c1c-9e4ca2847aeb" />
+
 I recommend adding this chart as the values that you need to set the S0, S1, and S2 columns to in the assembler to do these different operations.
 
 It is also helpful to label your LEDs so you know what they are telling you. Additionally, you can label the columns in the assembler so you know what value each column is. This the what each column is for, from left to right: A0, A1, B0, B1, S0, S1, S2, A_OPCODE, FLAG0, FLAG1, FLAG_VALUE, ADDRESS0, ADDRESS1, ADDRESS2, ADDRESS3.
