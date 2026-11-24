@@ -54,7 +54,7 @@ This part of the ALU does 4 operations: it can see if values are both 1, see if 
 Since there are many operations that the ALU can do, these two muxes decide which operation to use. The ALU does all of the operations I talked about above the input numbers, but these muxs only let the outputs from one of the operations through. There are 2 muxs, since the inputs are 2 bit numbers and each mux can only deal with one bit. They take in all the outputs from the different operations and also S0, S1, and S2 from the ROM. The S's tell the muxs which value to let through. If those three input values are 010 (2), the muxs let the second value through. I6 on both of them is not being used, so it is tied to GND. They output F0 and F1, which go to the flags, LEDs, and accumulator.
 
 ## Flags
-Often times the CPU doesn't care what the output number is; it only cares about its characteristics (negative, zero, etc.) These flags describe those characteristics. There are 3 flags: negative, zero, and overflow. Negative sees if the output is negative, zero sees if the output is zero, and overflow sees if the output was more than 2 bits (this could happen if 11 and 11 were added, for example, as that would result in 110).
+Often, the CPU doesn't care what the output number is; it only cares about its characteristics (negative, zero, etc.) These flags describe those characteristics. There are 3 flags: negative, zero, and overflow. Negative sees if the output is negative, zero sees if the output is zero, and overflow sees if the output was more than 2 bits (this could happen if 11 and 11 were added, for example, as that would result in 110).
 
 <img width="501" height="548" alt="Screenshot 2026-11-21 at 8 27 39 PM" src="https://github.com/user-attachments/assets/c2b5d2ef-ea08-41a0-b324-fb1a3ab69b7f" />
 
@@ -75,14 +75,14 @@ Sometimes, we want to do an operation to 2 new values, but sometimes we want to 
 
 <img width="641" height="699" alt="Screenshot 2026-11-21 at 8 42 50 PM" src="https://github.com/user-attachments/assets/1c31dc26-1fe3-4c11-8592-c64a5a19a97b" />
 
-Because of this, we have a mux that decides if we want to use a new value for A0 and A1 or the old one. It takes the old value from the accumulator and a new value from the ROM. It also takes a value from the ROM called A_OPCODE, which determines if the output of the mux is the old or new value. Based on that, it outputs a 2 bits that are sent to the ALU as the A0 and A1 values.
+Because of this, we have a mux that decides if we want to use a new value for A0 and A1 or the old one. It takes the old value from the accumulator and a new value from the ROM. It also takes a value from the ROM called A_OPCODE, which determines if the output of the mux is the old or new value. Based on that, it outputs 2 bits that are sent to the ALU as the A0 and A1 values.
 
 ## Branch Logic
 Sometimes, we want to skip to a different instruction based on the output of the last operation.
 
 <img width="749" height="716" alt="Screenshot 2026-11-21 at 8 44 52 PM" src="https://github.com/user-attachments/assets/33d0d499-1d8a-49a0-afb5-e0de1a358b80" />
 
-To decide this, we use a mux and an XOR gate. The mux takes in the flag values and ties all the other unused inputs to GND. It also takes in two bits from the ROM called FLAG0 and FLAG1. These 2 values tell the mux what flag to look at. If those values make the number 01 (1), the mux looks at the first flag. It outputs the value of that flag to the XOR. The XOR then takes another input from the ROM called FLAG_VALUE. FLAG_VALUE says if the program should jump to a different step if the falg value is 0 or 1. Then it outputs JMP to the PC mux, which I mentioned before.
+To decide this, we use a mux and an XOR gate. The mux takes in the flag values and ties all the other unused inputs to GND. It also takes in two bits from the ROM called FLAG0 and FLAG1. These 2 values tell the mux what flag to look at. If those values make the number 01 (1), the mux looks at the first flag. It outputs the value of that flag to the XOR. The XOR then takes another input from the ROM called FLAG_VALUE. FLAG_VALUE says if the program should jump to a different step if the flag value is 0 or 1. Then it outputs JMP to the PC mux, which I mentioned before.
 
 ## Set Clock
 This is the first piece of the part of the CPU that changes the instructions in the ROM.
@@ -91,7 +91,7 @@ This is the first piece of the part of the CPU that changes the instructions in 
 
 The first part of this is the 5-5-5 timer at the top. It and everything attached to it are the actual clock. It's a more complicated version of the clock from before. It outputs SLOW_CLK and its opposite, SLOW_CLK_N.
 
-The AND gate under it takes output from that clock, SLOW_CLK, and also RUN_S, which I'll explain later. If both those values are true, meaning if the clock is pulsing and also RUN_S is on, then output pulse.
+The AND gate under it takes output from that clock, SLOW_CLK, and also RUN_S, which I'll explain later. If both those values are true, meaning if the clock is pulsing and also RUN_S is on, then it outputs a PULSE.
 
 The NOT gate under that inverts PULSE to PULSE_N.
 
@@ -113,14 +113,14 @@ This is a decoder, just like the one that connects to the ROM. It takes the valu
 ## Assembler
 <img width="1046" height="530" alt="Screenshot 2026-11-23 at 2 54 40 PM" src="https://github.com/user-attachments/assets/4e8235d6-77cb-4a2b-8b01-07333930d25a" />
 
-This is the final piece in this section, and once you understand it you will understand how this section works. Remember, the point of this section is the write instructions to the ROM. This piece is a matrix that mirrors the ROM, with the same number of rows and columns. It is a bunch of switches that you switch to manually write the instructions. For example if you want the value of A1 in the third step to be one, you go to the third row in the A1 column and flip the switch on, so it is a one. The idea of this matrix is that you manually set all the values, and then you flip the RUN_S switch from before, and it writes all these values to the ROM.
+This is the final piece in this section, and once you understand it you will understand how this section works. Remember, the point of this section is to write instructions to the ROM. This piece is a matrix that mirrors the ROM, with the same number of rows and columns. It is a bunch of switches that you switch to manually write the instructions. For example if you want the value of A1 in the third step to be one, you go to the third row in the A1 column and flip the switch on, so it is a one. The idea of this matrix is that you manually set all the values, and then you flip the RUN_S switch from before, and it writes all these values to the ROM.
 
 <img width="739" height="525" alt="Screenshot 2026-11-23 at 2 59 41 PM" src="https://github.com/user-attachments/assets/c8362f45-19e4-476b-ac30-6322a8c53d50" />
 
 This is one switch in the matrix. It is very simple. It is just connected to a diode so the current doesn't leak, and all you need to do is flip the switch and the value changes.
 
 ## Assembler connection to ROM
-This is the most complicated part of the CPU. The idea behind it is that the set counter turns on the rows in the assembler one at a time. There is only one row that has power at a time. Then, the values from each of the columns in the assembler pass through gates (I'll explain these later) and a driver to give it enough power to change the values in the ROM. The value from the columns runs down its corresponding column in the ROM, and only changes a latches value if its row is turned on. This way, by running through every row, every latch can be changed to match the assembler.
+This is the most complicated part of the CPU. The idea behind it is that the set counter turns on the rows in the assembler one at a time. There is only one row that has power at a time. Then, the values from each of the columns in the assembler pass through gates (I'll explain these later) and a driver to give it enough power to change the values in the ROM. The value from the columns runs down its corresponding column in the ROM, and only changes a latch's value if its row is turned on. This way, by running through every row, every latch can be changed to match the assembler.
 
 <img width="983" height="498" alt="Screenshot 2026-11-23 at 3 08 03 PM" src="https://github.com/user-attachments/assets/f618a955-c98d-4287-bcf8-ec3fca5536c2" />
 
@@ -128,15 +128,15 @@ These are all the gates for the 15 columns in the ROM.
 
 <img width="658" height="386" alt="Screenshot 2026-11-23 at 3 08 56 PM" src="https://github.com/user-attachments/assets/7508cf71-de5c-4194-ad81-f176671c36f4" />
 
-There are two for every column; one to make the latch value 0, and one to make it 1. The AND gate only lets a one through if the value inputted into it from the column in the assembler is a one, and the NOT gate only lets a one through the value inputted into it from the column in the assembler is a one. Only one of these gates will output a one.
+There are two for every column; one to make the latch value 0, and one to make it 1. The AND gate only lets a one through if the value inputted into it from the column in the assembler is a one, and the NOT gate only lets a one through the value inputted into it from the column in the assembler is a zero. Only one of these gates will output a one at the same time.
 
 <img width="994" height="562" alt="Screenshot 2026-11-23 at 3 12 24 PM" src="https://github.com/user-attachments/assets/234abfad-4d42-4f8d-8831-0e1179a81d88" />
 
-These two outputs then go to the driver, which makes their voltage much higher. If it's input was a 1 and a 0, it would still output a 1 and a 0, only the 1 would be a higher voltage.
+These two outputs then go to the driver, which makes their voltage much higher. If its input was a 1 and a 0, it would still output a 1 and a 0, only the 1 would be a higher voltage.
 
 <img width="523" height="778" alt="Screenshot 2026-11-23 at 3 14 20 PM" src="https://github.com/user-attachments/assets/86bb30c3-1f72-499a-bc49-db1abc0cf2b8" />
 
-It sends it's output to the two coils in the latch. The +S coil is to make the latch a 1, so that pin is only fed from the pin in the driver fed by the AND gate. The +R coil is to make the latch a 0, so that pin is only fed from the pni in the driver fed by the NOT gate.
+It sends its output to the two coils in the latch. The +S coil is to make the latch a 1, so that pin is only fed from the pin in the driver fed by the AND gate. The +R coil is to make the latch a 0, so that pin is only fed from the pin in the driver fed by the NOT gate.
 
 ## PCB
 <img width="817" height="628" alt="Screenshot 2026-11-23 at 3 15 54 PM" src="https://github.com/user-attachments/assets/ddbb0748-0f68-4277-956c-87b4b3257385" />
@@ -147,4 +147,4 @@ For the PCB, wire it however you'd like. This is a picture of how I wired mine, 
 
 I recommend adding this chart as the values that you need to set the S0, S1, and S2 columns to in the assembler to do these different operations.
 
-It is also helpful to label your LEDs so you know what they are telling you. Additionally, you can label the columns in the assembler so you know what value each column is. This the what each column is for, from left to right: A0, A1, B0, B1, S0, S1, S2, A_OPCODE, FLAG0, FLAG1, FLAG_VALUE, ADDRESS0, ADDRESS1, ADDRESS2, ADDRESS3.
+It is also helpful to label your LEDs so you know what they are telling you. Additionally, you can label the columns in the assembler so you know what value each column is. This is what each column is for, from left to right: A0, A1, B0, B1, S0, S1, S2, A_OPCODE, FLAG0, FLAG1, FLAG_VALUE, ADDRESS0, ADDRESS1, ADDRESS2, ADDRESS3.
